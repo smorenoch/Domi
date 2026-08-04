@@ -1,0 +1,426 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+<title>Aprende los Animales en Inglés</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;700;800&family=Nunito:wght@500;700;800&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --sky-top:#BDEBFF;
+    --sky-bottom:#FFF3DA;
+    --sun:#FFD35C;
+    --grass:#7BC96F;
+    --grass-dark:#5FA654;
+    --ink:#3A3358;
+    --card:#FFFFFF;
+    --primary:#FF6F91;
+    --primary-dark:#E85575;
+    --shadow:rgba(58,51,88,.20);
+  }
+  *{box-sizing:border-box; -webkit-user-select:none; user-select:none; -webkit-touch-callout:none; touch-action:manipulation;}
+  html,body{height:100%; margin:0; overflow:hidden;}
+  body{
+    font-family:'Nunito', sans-serif;
+    color:var(--ink);
+    background:linear-gradient(180deg, var(--sky-top) 0%, var(--sky-top) 55%, var(--sky-bottom) 100%);
+    height:100vh; width:100vw; position:relative;
+  }
+  .display{font-family:'Baloo 2', cursive;}
+  .ground{position:absolute; left:0; right:0; bottom:0; height:9%; background:var(--grass); border-top:6px solid var(--grass-dark);}
+  .screen{position:absolute; inset:0; display:none; flex-direction:column; align-items:center; justify-content:center; padding:3vh 4vw; text-align:center;}
+  .screen.active{display:flex;}
+  .corner-btn{position:absolute; top:2vh; width:52px; height:52px; border-radius:50%; background:var(--card); border:none; box-shadow:0 4px 10px var(--shadow); font-size:24px; display:flex; align-items:center; justify-content:center; cursor:pointer; z-index:50;}
+  #btn-mute{left:2vh;} #btn-home{right:2vh;}
+  .corner-btn:active{transform:scale(.9);}
+  .hide{display:none !important;}
+
+  .sun-wrap{width:min(22vw,140px); height:min(22vw,140px); margin-bottom:1vh;}
+  .sun-wrap svg{width:100%; height:100%;}
+  @media (prefers-reduced-motion: no-preference){ .sun-rays{animation:spin 22s linear infinite; transform-origin:50px 50px;} }
+  @keyframes spin{from{transform:rotate(0)} to{transform:rotate(360deg)}}
+  .sun-face.happy .eyes-normal{display:none;}
+  .sun-face:not(.happy) .eyes-happy{display:none;}
+  .sun-face.happy .mouth-normal{display:none;}
+  .sun-face:not(.happy) .mouth-happy{display:none;}
+
+  h1.title{font-size:clamp(28px,6vw,48px); margin:0 0 1vh; font-weight:800;}
+  .subtitle{font-size:clamp(15px,2.6vw,20px); font-weight:700; margin:0 0 0.5vh; max-width:520px;}
+  .note{font-size:clamp(12px,2vw,15px); opacity:.75; margin:0 0 3vh;}
+  .big-btn{font-family:'Baloo 2', cursive; font-size:clamp(20px,4vw,28px); font-weight:700; color:#fff; background:var(--primary); border:none; border-radius:100px; padding:1.6vh 6vw; box-shadow:0 8px 0 var(--primary-dark), 0 12px 18px var(--shadow); cursor:pointer;}
+  .big-btn:active{transform:translateY(4px); box-shadow:0 4px 0 var(--primary-dark), 0 8px 12px var(--shadow);}
+
+  .progress{position:absolute; top:2vh; left:50%; transform:translateX(-50%); display:flex; gap:10px; z-index:40;}
+  .dot{width:16px; height:16px; border-radius:50%; background:#ffffffaa; border:2px solid #ffffff; transition:.3s;}
+  .dot.done{border-color:transparent; background:var(--grass-dark);}
+  .dot.current{box-shadow:0 0 0 4px #ffffff88; transform:scale(1.15);}
+
+  .target-card{background:var(--card); border-radius:28px; padding:2vh 5vw; margin-bottom:2vh; box-shadow:0 8px 20px var(--shadow); display:flex; flex-direction:column; align-items:center;}
+  .target-emoji-wrap{width:min(20vw,110px); height:min(20vw,110px); border-radius:50%; background:#FFF3DA; display:flex; align-items:center; justify-content:center; font-size:clamp(38px,9vw,64px); margin-bottom:1vh;}
+  .target-word{font-size:clamp(30px,6vw,52px); font-weight:800; letter-spacing:1px; line-height:1;}
+  .target-word-es{font-size:clamp(13px,2.4vw,17px); font-weight:700; opacity:.6; margin-top:2px;}
+  .speak-btn{margin-top:1.2vh; width:56px; height:56px; border-radius:50%; border:none; background:#FFF3DA; font-size:26px; box-shadow:0 4px 10px var(--shadow); cursor:pointer;}
+  .speak-btn:active{transform:scale(.9);}
+
+  .tray{display:flex; gap:10px; margin-bottom:1.6vh;}
+  .slot{width:22px; height:22px; border-radius:50%; border:3px solid #ffffffcc; background:#ffffff55; transition:.25s;}
+
+  .grid{display:grid; grid-template-columns:repeat(3,1fr); gap:2.4vh 3vw; width:min(560px,86vw);}
+  .tile{aspect-ratio:1; border-radius:22px; background:var(--card); box-shadow:0 6px 14px var(--shadow); display:flex; align-items:center; justify-content:center; cursor:pointer; transition:transform .15s;}
+  .tile-emoji{font-size:clamp(30px,8vw,54px);}
+  .tile:active{transform:scale(.9);}
+  .tile.wrong{animation:shake .32s;}
+  .tile.correct{animation:pop .35s ease forwards;}
+  @keyframes shake{0%,100%{transform:translateX(0)}25%{transform:translateX(-8px)}75%{transform:translateX(8px)}}
+  @keyframes pop{to{transform:scale(0); opacity:0;}}
+
+  #celebration{position:absolute; inset:0; z-index:60; display:none; flex-direction:column; align-items:center; justify-content:center; background:rgba(255,255,255,.55); backdrop-filter:blur(2px);}
+  #celebration.active{display:flex;}
+  .celeb-text{font-size:clamp(26px,5.5vw,40px); font-weight:800; margin:1.4vh 0 2vh;}
+  .confetti-piece{position:absolute; top:-5%; width:14px; height:14px; border-radius:3px; opacity:.95;}
+  @media (prefers-reduced-motion: no-preference){ .confetti-piece{animation:fall linear forwards;} }
+  @keyframes fall{to{transform:translateY(115vh) rotate(360deg);}}
+
+  .medals{display:flex; gap:12px; margin:2vh 0 3vh; flex-wrap:wrap; justify-content:center;}
+  .medal{width:52px; height:52px; border-radius:50%; box-shadow:0 4px 8px var(--shadow); background:var(--card); display:flex; align-items:center; justify-content:center; font-size:26px;}
+</style>
+</head>
+<body>
+
+<div class="ground"></div>
+<button class="corner-btn" id="btn-mute" aria-label="silenciar">🔊</button>
+<button class="corner-btn hide" id="btn-home" aria-label="inicio">🏠</button>
+<div class="progress hide" id="progress"></div>
+
+<!-- HOME -->
+<div class="screen active" id="screen-home">
+  <div class="sun-wrap">
+    <svg viewBox="0 0 100 100">
+      <g class="sun-rays" fill="var(--sun)">
+        <rect x="46" y="0" width="8" height="20" rx="4"/>
+        <rect x="46" y="0" width="8" height="20" rx="4" transform="rotate(45 50 50)"/>
+        <rect x="46" y="0" width="8" height="20" rx="4" transform="rotate(90 50 50)"/>
+        <rect x="46" y="0" width="8" height="20" rx="4" transform="rotate(135 50 50)"/>
+        <rect x="46" y="0" width="8" height="20" rx="4" transform="rotate(180 50 50)"/>
+        <rect x="46" y="0" width="8" height="20" rx="4" transform="rotate(225 50 50)"/>
+        <rect x="46" y="0" width="8" height="20" rx="4" transform="rotate(270 50 50)"/>
+        <rect x="46" y="0" width="8" height="20" rx="4" transform="rotate(315 50 50)"/>
+      </g>
+      <circle cx="50" cy="50" r="30" fill="var(--sun)"/>
+      <g class="sun-face">
+        <g class="eyes-normal"><circle cx="40" cy="46" r="3.2" fill="#3A3358"/><circle cx="60" cy="46" r="3.2" fill="#3A3358"/></g>
+        <g class="eyes-happy"><path d="M35 46 q5 -6 10 0" stroke="#3A3358" stroke-width="3" fill="none" stroke-linecap="round"/><path d="M55 46 q5 -6 10 0" stroke="#3A3358" stroke-width="3" fill="none" stroke-linecap="round"/></g>
+        <path class="mouth-normal" d="M40 58 q10 8 20 0" stroke="#3A3358" stroke-width="3" fill="none" stroke-linecap="round"/>
+        <path class="mouth-happy" d="M36 56 q14 16 28 0" stroke="#3A3358" stroke-width="3.5" fill="none" stroke-linecap="round"/>
+      </g>
+    </svg>
+  </div>
+  <h1 class="title display">Aprende los Animales 🐾</h1>
+  <p class="subtitle">Escucha, busca y encuentra los animales en inglés</p>
+  <p class="note">Para jugar acompañado de un adulto · unos 10 minutos</p>
+  <button class="big-btn display" id="btn-start">▶ Empezar a jugar</button>
+</div>
+
+<!-- ROUND -->
+<div class="screen" id="screen-round">
+  <div class="target-card">
+    <div class="target-emoji-wrap" id="target-emoji">🐶</div>
+    <div class="target-word display" id="target-word">DOG</div>
+    <div class="target-word-es" id="target-word-es">(perro)</div>
+    <button class="speak-btn" id="btn-speak">🔊</button>
+  </div>
+  <div class="tray" id="tray"></div>
+  <div class="grid" id="grid"></div>
+</div>
+
+<!-- CELEBRATION -->
+<div id="celebration">
+  <div class="sun-wrap">
+    <svg viewBox="0 0 100 100">
+      <g class="sun-rays" fill="var(--sun)">
+        <rect x="46" y="0" width="8" height="20" rx="4"/>
+        <rect x="46" y="0" width="8" height="20" rx="4" transform="rotate(45 50 50)"/>
+        <rect x="46" y="0" width="8" height="20" rx="4" transform="rotate(90 50 50)"/>
+        <rect x="46" y="0" width="8" height="20" rx="4" transform="rotate(135 50 50)"/>
+        <rect x="46" y="0" width="8" height="20" rx="4" transform="rotate(180 50 50)"/>
+        <rect x="46" y="0" width="8" height="20" rx="4" transform="rotate(225 50 50)"/>
+        <rect x="46" y="0" width="8" height="20" rx="4" transform="rotate(270 50 50)"/>
+        <rect x="46" y="0" width="8" height="20" rx="4" transform="rotate(315 50 50)"/>
+      </g>
+      <circle cx="50" cy="50" r="30" fill="var(--sun)"/>
+      <g class="sun-face happy">
+        <g class="eyes-normal"><circle cx="40" cy="46" r="3.2" fill="#3A3358"/><circle cx="60" cy="46" r="3.2" fill="#3A3358"/></g>
+        <g class="eyes-happy"><path d="M35 46 q5 -6 10 0" stroke="#3A3358" stroke-width="3" fill="none" stroke-linecap="round"/><path d="M55 46 q5 -6 10 0" stroke="#3A3358" stroke-width="3" fill="none" stroke-linecap="round"/></g>
+        <path class="mouth-normal" d="M40 58 q10 8 20 0" stroke="#3A3358" stroke-width="3" fill="none" stroke-linecap="round"/>
+        <path class="mouth-happy" d="M36 56 q14 16 28 0" stroke="#3A3358" stroke-width="3.5" fill="none" stroke-linecap="round"/>
+      </g>
+    </svg>
+  </div>
+  <div class="celeb-text display">¡Genial! Great job! 🎉</div>
+  <button class="big-btn display" id="btn-next">Siguiente ▶</button>
+</div>
+
+<!-- FINAL -->
+<div class="screen" id="screen-final">
+  <div class="sun-wrap"><div style="font-size:min(20vw,110px);">🏆</div></div>
+  <h1 class="title display">¡Lo lograste!</h1>
+  <p class="subtitle">Aprendiste 6 animales en inglés</p>
+  <div class="medals" id="medals"></div>
+  <button class="big-btn display" id="btn-replay">🔁 Jugar de nuevo</button>
+</div>
+
+<script>
+(function(){
+  "use strict";
+
+  var ANIMALS = [
+    {id:'dog',   en:'Dog',   es:'perro',   emoji:'🐶', sound:'Woof woof!'},
+    {id:'cat',   en:'Cat',   es:'gato',    emoji:'🐱', sound:'Meow!'},
+    {id:'horse', en:'Horse', es:'caballo', emoji:'🐴', sound:'Neigh!'},
+    {id:'cow',   en:'Cow',   es:'vaca',    emoji:'🐮', sound:'Moo!'},
+    {id:'pig',   en:'Pig',   es:'cerdo',   emoji:'🐷', sound:'Oink oink!'},
+    {id:'duck',  en:'Duck',  es:'pato',    emoji:'🦆', sound:'Quack quack!'}
+  ];
+
+  var NEEDED = 4;
+  var TOTAL_TILES = 9;
+
+  var state = { roundIndex:0, collected:0, muted:false, audioCtx:null, voice:null, advanceTimer:null };
+
+  function $(id){ return document.getElementById(id); }
+  function shuffle(arr){
+    for (var i = arr.length - 1; i > 0; i--){
+      var j = Math.floor(Math.random() * (i + 1));
+      var tmp = arr[i]; arr[i] = arr[j]; arr[j] = tmp;
+    }
+    return arr;
+  }
+  function showScreen(id){
+    var screens = document.querySelectorAll('.screen');
+    for (var i = 0; i < screens.length; i++){ screens[i].classList.remove('active'); }
+    $(id).classList.add('active');
+  }
+
+  function loadVoice(){
+    if (!('speechSynthesis' in window)) return;
+    var voices = window.speechSynthesis.getVoices();
+    for (var i = 0; i < voices.length; i++){
+      if (voices[i].lang && voices[i].lang.indexOf('en') === 0){ state.voice = voices[i]; break; }
+    }
+  }
+  if ('speechSynthesis' in window){
+    loadVoice();
+    window.speechSynthesis.onvoiceschanged = loadVoice;
+  }
+  function speakQueue(list){
+    if (state.muted || !('speechSynthesis' in window)) return;
+    window.speechSynthesis.cancel();
+    list.forEach(function(text){
+      var u = new SpeechSynthesisUtterance(text);
+      u.lang = 'en-US';
+      u.rate = 0.85;
+      u.pitch = 1.1;
+      if (state.voice) u.voice = state.voice;
+      window.speechSynthesis.speak(u);
+    });
+  }
+  function speak(text){ speakQueue([text]); }
+
+  function ensureAudio(){
+    if (!state.audioCtx){
+      var Ctx = window.AudioContext || window.webkitAudioContext;
+      if (Ctx) state.audioCtx = new Ctx();
+    }
+    if (state.audioCtx && state.audioCtx.state === 'suspended'){ state.audioCtx.resume(); }
+  }
+  function tone(freq, start, dur, type, vol){
+    if (state.muted || !state.audioCtx) return;
+    type = type || 'sine'; vol = vol || 0.25;
+    var t0 = state.audioCtx.currentTime + start;
+    var osc = state.audioCtx.createOscillator();
+    var gain = state.audioCtx.createGain();
+    osc.type = type; osc.frequency.value = freq;
+    gain.gain.setValueAtTime(0, t0);
+    gain.gain.linearRampToValueAtTime(vol, t0 + 0.02);
+    gain.gain.linearRampToValueAtTime(0, t0 + dur);
+    osc.connect(gain).connect(state.audioCtx.destination);
+    osc.start(t0); osc.stop(t0 + dur + 0.03);
+  }
+  function playCorrect(){ tone(523.25,0,0.16); tone(659.25,0.11,0.2); }
+  function playWrong(){ tone(200,0,0.16,'sine',0.14); }
+  function playFanfare(){ [523.25,659.25,783.99,1046.5].forEach(function(f,i){ tone(f, i*0.15, 0.28); }); }
+
+  function buildTray(){
+    var tray = $('tray'); tray.innerHTML = '';
+    for (var i = 0; i < NEEDED; i++){
+      var s = document.createElement('div'); s.className = 'slot'; tray.appendChild(s);
+    }
+  }
+  function fillTray(){
+    var slots = document.querySelectorAll('#tray .slot');
+    for (var i = 0; i < slots.length; i++){
+      if (!slots[i].dataset.filled){
+        slots[i].dataset.filled = 'true';
+        slots[i].style.background = 'var(--primary)';
+        slots[i].style.borderColor = 'var(--primary)';
+        break;
+      }
+    }
+  }
+
+  function pickDistractors(targetIdx){
+    var others = [];
+    for (var i = 0; i < ANIMALS.length; i++){ if (i !== targetIdx) others.push(i); }
+    shuffle(others);
+    return others.slice(0, 2);
+  }
+
+  function buildGrid(targetIdx){
+    var distractors = pickDistractors(targetIdx);
+    var split = 2 + Math.floor(Math.random() * 2);
+    var counts = [
+      { idx: targetIdx, n: NEEDED },
+      { idx: distractors[0], n: split },
+      { idx: distractors[1], n: TOTAL_TILES - NEEDED - split }
+    ];
+    var pool = [];
+    counts.forEach(function(c){
+      for (var i = 0; i < c.n; i++){ pool.push({ colorIdx: c.idx }); }
+    });
+    shuffle(pool);
+
+    var grid = $('grid'); grid.innerHTML = '';
+    pool.forEach(function(item){
+      var tile = document.createElement('div');
+      tile.className = 'tile';
+      tile.innerHTML = '<span class="tile-emoji">' + ANIMALS[item.colorIdx].emoji + '</span>';
+      tile.dataset.colorIdx = item.colorIdx;
+      tile.addEventListener('click', function(){ onTileClick(this, targetIdx); });
+      grid.appendChild(tile);
+    });
+  }
+
+  function onTileClick(tile, targetIdx){
+    if (tile.dataset.done) return;
+    var isMatch = Number(tile.dataset.colorIdx) === targetIdx;
+    if (isMatch){
+      tile.dataset.done = 'true';
+      tile.classList.add('correct');
+      playCorrect();
+      speakQueue([ANIMALS[targetIdx].en, ANIMALS[targetIdx].sound]);
+      state.collected++;
+      fillTray();
+      if (state.collected >= NEEDED){ setTimeout(roundComplete, 700); }
+    } else {
+      playWrong();
+      tile.classList.remove('wrong');
+      void tile.offsetWidth;
+      tile.classList.add('wrong');
+    }
+  }
+
+  function updateProgressDots(){
+    var wrap = $('progress'); wrap.innerHTML = '';
+    for (var i = 0; i < ANIMALS.length; i++){
+      var d = document.createElement('div');
+      d.className = 'dot';
+      if (i < state.roundIndex){ d.classList.add('done'); }
+      if (i === state.roundIndex){ d.classList.add('current'); }
+      wrap.appendChild(d);
+    }
+  }
+
+  function startRound(idx){
+    state.roundIndex = idx;
+    state.collected = 0;
+    var a = ANIMALS[idx];
+
+    $('progress').classList.remove('hide');
+    $('btn-home').classList.remove('hide');
+    updateProgressDots();
+
+    $('target-emoji').textContent = a.emoji;
+    $('target-word').textContent = a.en.toUpperCase();
+    $('target-word-es').textContent = '(' + a.es + ')';
+
+    buildTray();
+    buildGrid(idx);
+    showScreen('screen-round');
+
+    setTimeout(function(){ speak(a.en); }, 350);
+  }
+
+  function roundComplete(){
+    playFanfare();
+    speak('Great job! ' + ANIMALS[state.roundIndex].en + '!');
+    launchConfetti();
+    $('celebration').classList.add('active');
+    clearTimeout(state.advanceTimer);
+    state.advanceTimer = setTimeout(advance, 4200);
+  }
+
+  function advance(){
+    clearTimeout(state.advanceTimer);
+    $('celebration').classList.remove('active');
+    clearConfetti();
+    if (state.roundIndex + 1 < ANIMALS.length){ startRound(state.roundIndex + 1); }
+    else { showFinal(); }
+  }
+
+  function launchConfetti(){
+    var palette = ['#FF6F91','#FFD35C','#7BC96F','#5EC8E0','#B892FF'];
+    for (var i = 0; i < 36; i++){
+      var p = document.createElement('div');
+      p.className = 'confetti-piece';
+      p.style.left = (Math.random()*100) + 'vw';
+      p.style.background = palette[Math.floor(Math.random()*palette.length)];
+      p.style.animationDuration = (1.6 + Math.random()*1.4) + 's';
+      p.style.animationDelay = (Math.random()*0.4) + 's';
+      p.style.borderRadius = (Math.random() > 0.5) ? '50%' : '3px';
+      $('celebration').appendChild(p);
+    }
+  }
+  function clearConfetti(){
+    var pieces = document.querySelectorAll('.confetti-piece');
+    for (var i = 0; i < pieces.length; i++){ pieces[i].remove(); }
+  }
+
+  function showFinal(){
+    $('progress').classList.add('hide');
+    $('btn-home').classList.add('hide');
+    var medals = $('medals'); medals.innerHTML = '';
+    ANIMALS.forEach(function(a){
+      var m = document.createElement('div');
+      m.className = 'medal';
+      m.textContent = a.emoji;
+      medals.appendChild(m);
+    });
+    showScreen('screen-final');
+  }
+
+  function goHome(){
+    clearTimeout(state.advanceTimer);
+    $('celebration').classList.remove('active');
+    clearConfetti();
+    $('progress').classList.add('hide');
+    $('btn-home').classList.add('hide');
+    showScreen('screen-home');
+  }
+
+  $('btn-start').addEventListener('click', function(){ ensureAudio(); startRound(0); });
+  $('btn-speak').addEventListener('click', function(){ speak(ANIMALS[state.roundIndex].en); });
+  $('btn-next').addEventListener('click', advance);
+  $('btn-replay').addEventListener('click', function(){ ensureAudio(); startRound(0); });
+  $('btn-home').addEventListener('click', goHome);
+  $('btn-mute').addEventListener('click', function(){
+    state.muted = !state.muted;
+    $('btn-mute').textContent = state.muted ? '🔇' : '🔊';
+    if (state.muted && 'speechSynthesis' in window) window.speechSynthesis.cancel();
+  });
+
+})();
+</script>
+</body>
+</html>

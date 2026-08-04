@@ -1,0 +1,40 @@
+/* ---------------------------------------------------------------
+   Tokens del sistema de diseño.
+   Los 9 colores base y las 2 tipografías vienen tal cual de los 3
+   prototipos en /reference — no cambiarlos sin revisar las 3 lecciones.
+   --------------------------------------------------------------- */
+:root {
+  /* Paleta base (validada en los prototipos) */
+  --sky-top: #BDEBFF;
+  --sky-bottom: #FFF3DA;
+  --sun: #FFD35C;
+  --grass: #7BC96F;
+  --grass-dark: #5FA654;
+  --ink: #3A3358;
+  --card: #FFFFFF;
+  --primary: #FF6F91;
+  --primary-dark: #E85575;
+
+  /* Derivados */
+  --shadow: rgba(58, 51, 88, .20);
+  --cream: #FFF3DA;
+  --ink-soft: rgba(58, 51, 88, .62);
+
+  /* Acentos por track — sólo para el índice, para que se lean como
+     dos secciones distintas del mismo libro. Ambos salen de la paleta
+     de confeti ya usada en los prototipos. */
+  --track-en: #5EC8E0;
+  --track-en-dark: #3AA7C0;
+  --track-es: #B892FF;
+  --track-es-dark: #9670E0;
+
+  /* Formas */
+  --radius-card: 28px;
+  --radius-tile: 22px;
+  --radius-pill: 100px;
+
+  /* Tiempos */
+  --dur-fast: .15s;
+  --dur: .28s;
+  --dur-slow: .45s;
+}

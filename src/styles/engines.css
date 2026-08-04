@@ -1,0 +1,393 @@
+/* ---------------------------------------------------------------
+   Estilos de los motores de juego.
+   collectMatch y roomSequence vienen de /reference sin rediseño.
+   --------------------------------------------------------------- */
+
+/* ---------- piezas compartidas entre motores ---------- */
+.stage {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  flex: 1;
+  min-height: 0;
+}
+
+.target-card {
+  background: var(--card);
+  border-radius: 26px;
+  padding: 1.6vh 5vw;
+  margin-bottom: 1.6vh;
+  box-shadow: 0 8px 20px var(--shadow);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+.target-visual {
+  width: min(17vw, 92px);
+  height: min(17vw, 92px);
+  border-radius: 50%;
+  background: var(--cream);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: clamp(30px, 7vw, 52px);
+  margin-bottom: .8vh;
+  padding: 14px;
+}
+.target-visual svg { width: 100%; height: 100%; }
+.target-visual.swatch {
+  background: currentColor;
+  box-shadow: inset 0 -6px 10px rgba(0, 0, 0, .15);
+  padding: 0;
+}
+.target-word {
+  font-size: clamp(28px, 5.4vw, 48px);
+  font-weight: 800;
+  letter-spacing: 1px;
+  line-height: 1;
+}
+.target-word-es {
+  font-size: clamp(12px, 2.2vw, 16px);
+  font-weight: 700;
+  opacity: .6;
+  margin-top: 2px;
+}
+.target-card .speak-btn { margin-top: 1vh; }
+
+/* Bandeja de "encontrados" */
+.tray { display: flex; gap: 10px; margin-bottom: 1.5vh; }
+.slot {
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  border: 3px solid #ffffffcc;
+  background: #ffffff55;
+  transition: var(--dur);
+}
+
+/* Grilla de tiles */
+.grid { display: grid; gap: 2.4vh 3vw; }
+.grid.cols-3 { grid-template-columns: repeat(3, 1fr); width: min(560px, 86vw); }
+.grid.cols-2 { grid-template-columns: repeat(2, 1fr); width: min(420px, 78vw); gap: 3vh 5vw; }
+
+.tile {
+  position: relative;
+  aspect-ratio: 1;
+  border-radius: var(--radius-tile);
+  background: var(--card);
+  box-shadow: 0 6px 14px var(--shadow);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: transform var(--dur-fast), opacity .2s;
+}
+.tile svg { width: 62%; height: 62%; }
+.tile-emoji { font-size: clamp(30px, 8vw, 54px); }
+.tile:active { transform: scale(.9); }
+.tile.wrong { animation: shake .32s; }
+.tile.collected { animation: pop .35s ease forwards; }
+.tile.found { opacity: .55; }
+.tile.pulse { animation: foundPulse .4s ease; }
+.found-badge {
+  position: absolute;
+  top: 6px;
+  right: 6px;
+  font-size: clamp(16px, 3vw, 22px);
+}
+
+@keyframes shake {
+  0%, 100% { transform: translateX(0); }
+  25% { transform: translateX(-8px); }
+  75% { transform: translateX(8px); }
+}
+@keyframes pop { to { transform: scale(0); opacity: 0; } }
+@keyframes foundPulse {
+  0% { transform: scale(1); }
+  40% { transform: scale(1.18); }
+  100% { transform: scale(1); }
+}
+
+/* ---------- roomSequence: banner de habitación ---------- */
+.room-banner {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 1.2vh;
+}
+.room-banner-icon { font-size: clamp(22px, 4vw, 30px); }
+.room-banner-text {
+  font-family: 'Baloo 2', cursive;
+  font-size: clamp(16px, 3vw, 22px);
+  font-weight: 700;
+}
+.room-banner-es { font-size: clamp(12px, 2vw, 15px); opacity: .6; font-weight: 700; }
+.roomSequence .tile { padding: 16%; }
+.roomSequence .tile-emoji { font-size: clamp(34px, 9vw, 60px); }
+
+/* ---------- countingTap ---------- */
+.count-prompt {
+  font-family: 'Baloo 2', cursive;
+  font-size: clamp(15px, 2.6vw, 20px);
+  font-weight: 700;
+  opacity: .7;
+  margin-bottom: 1vh;
+}
+.counter {
+  width: min(20vw, 96px);
+  height: min(20vw, 96px);
+  border-radius: 50%;
+  background: var(--card);
+  box-shadow: 0 8px 18px var(--shadow);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 1.6vh;
+  transition: transform var(--dur-fast);
+}
+.counter.bump { animation: foundPulse .35s ease; }
+.counter-num {
+  font-family: 'Baloo 2', cursive;
+  font-size: clamp(30px, 7vw, 52px);
+  font-weight: 800;
+  line-height: 1;
+}
+.counter-word {
+  font-size: clamp(11px, 1.9vw, 14px);
+  font-weight: 700;
+  opacity: .6;
+  letter-spacing: .5px;
+  min-height: 1em;
+}
+.count-objects {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1.6vh 2.4vw;
+  justify-content: center;
+  align-items: center;
+  width: min(620px, 90vw);
+}
+.count-obj {
+  position: relative;
+  width: clamp(56px, 13vw, 96px);
+  height: clamp(56px, 13vw, 96px);
+  border-radius: 24px;
+  background: var(--card);
+  border: none;
+  box-shadow: 0 6px 14px var(--shadow);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: clamp(30px, 7vw, 50px);
+  cursor: pointer;
+  transition: transform var(--dur-fast), background var(--dur);
+}
+.count-obj:active { transform: scale(.9); }
+.count-obj.counted { background: #DFF3D8; transform: none; }
+.count-obj.counted .count-badge { transform: scale(1); }
+.count-badge {
+  position: absolute;
+  top: -8px;
+  right: -8px;
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  background: var(--primary);
+  color: #fff;
+  font-family: 'Baloo 2', cursive;
+  font-size: 16px;
+  font-weight: 800;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transform: scale(0);
+  transition: transform var(--dur) cubic-bezier(.3, 1.6, .5, 1);
+}
+.number-reveal {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  background: var(--card);
+  border-radius: var(--radius-card);
+  padding: 2.4vh 8vw;
+  box-shadow: 0 10px 24px var(--shadow);
+}
+.number-reveal-num {
+  font-family: 'Baloo 2', cursive;
+  font-size: clamp(60px, 16vw, 130px);
+  font-weight: 800;
+  line-height: 1;
+  color: var(--primary);
+}
+.number-reveal-en {
+  font-family: 'Baloo 2', cursive;
+  font-size: clamp(26px, 5vw, 42px);
+  font-weight: 800;
+  letter-spacing: 1px;
+}
+.number-reveal-es { font-size: clamp(12px, 2.2vw, 16px); font-weight: 700; opacity: .6; }
+
+/* ---------- phraseSituation ---------- */
+.phrase-card {
+  background: var(--card);
+  border-radius: var(--radius-card);
+  padding: 2vh 6vw;
+  box-shadow: 0 10px 24px var(--shadow);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  max-width: min(560px, 90vw);
+}
+.phrase-scene {
+  width: min(26vw, 130px);
+  height: min(26vw, 130px);
+  border-radius: 50%;
+  background: var(--cream);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: clamp(44px, 11vw, 74px);
+  border: none;
+  box-shadow: 0 6px 14px var(--shadow);
+  cursor: pointer;
+  transition: transform var(--dur-fast);
+}
+.phrase-scene:active { transform: scale(.92); }
+.phrase-scene.bounce { animation: sceneBounce .5s ease; }
+@keyframes sceneBounce {
+  0% { transform: scale(1); }
+  30% { transform: scale(1.12) rotate(-4deg); }
+  60% { transform: scale(.98) rotate(3deg); }
+  100% { transform: scale(1); }
+}
+.phrase-situation {
+  font-size: clamp(12px, 2.2vw, 16px);
+  font-weight: 700;
+  opacity: .6;
+  margin: 1.2vh 0 .4vh;
+}
+.phrase-en {
+  font-family: 'Baloo 2', cursive;
+  font-size: clamp(30px, 6.4vw, 54px);
+  font-weight: 800;
+  line-height: 1.05;
+}
+.phrase-es { font-size: clamp(13px, 2.4vw, 17px); font-weight: 700; opacity: .6; }
+.phrase-hint {
+  font-family: 'Baloo 2', cursive;
+  font-size: clamp(13px, 2.2vw, 16px);
+  font-weight: 700;
+  opacity: .65;
+  margin-top: 1.4vh;
+}
+
+/* ---------- memoryPairs ---------- */
+.memory-board {
+  display: grid;
+  gap: 1.6vh 2.4vw;
+  width: min(620px, 92vw);
+  justify-content: center;
+}
+.card {
+  aspect-ratio: 3 / 4;
+  perspective: 800px;
+  border: none;
+  background: none;
+  padding: 0;
+  cursor: pointer;
+  max-height: 26vh;
+}
+.card-inner {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  transition: transform var(--dur-slow) cubic-bezier(.4, .1, .3, 1.1);
+  transform-style: preserve-3d;
+}
+.card.flipped .card-inner { transform: rotateY(180deg); }
+.card-face {
+  position: absolute;
+  inset: 0;
+  border-radius: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+  box-shadow: 0 6px 14px var(--shadow);
+}
+.card-back {
+  background: var(--primary);
+  color: #fff;
+  font-size: clamp(24px, 5vw, 38px);
+}
+.card-front {
+  background: var(--card);
+  transform: rotateY(180deg);
+  font-size: clamp(30px, 8vw, 54px);
+}
+.card.matched .card-front { background: #DFF3D8; }
+.card.matched { animation: foundPulse .4s ease; }
+@media (prefers-reduced-motion: reduce) {
+  .card-inner { transition: none; }
+}
+
+/* ---------- classification (¿cuál no va?) ---------- */
+.odd-row {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 2.4vw;
+  width: min(760px, 94vw);
+}
+@media (max-width: 560px) {
+  .odd-row { grid-template-columns: repeat(2, 1fr); gap: 2vh 4vw; }
+}
+.odd-tile {
+  aspect-ratio: 1;
+  border-radius: var(--radius-tile);
+  background: var(--card);
+  border: none;
+  box-shadow: 0 6px 14px var(--shadow);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: clamp(34px, 8vw, 62px);
+  cursor: pointer;
+  transition: transform var(--dur-fast), opacity var(--dur);
+}
+.odd-tile:active { transform: scale(.92); }
+.odd-tile.wrong { animation: shake .32s; }
+.odd-tile.picked { background: #DFF3D8; animation: foundPulse .4s ease; }
+.odd-tile.dim { opacity: .35; }
+.odd-reason {
+  font-family: 'Baloo 2', cursive;
+  font-size: clamp(14px, 2.6vw, 20px);
+  font-weight: 700;
+  margin-top: 1.8vh;
+  min-height: 1.4em;
+  opacity: 0;
+  transition: opacity var(--dur);
+}
+.odd-reason.show { opacity: .85; }
+
+/* ---------- instrucción hablada (Track B) ---------- */
+.instruction {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: #ffffffcc;
+  border-radius: var(--radius-pill);
+  padding: 8px 10px 8px 18px;
+  margin-bottom: 1.8vh;
+  box-shadow: 0 4px 12px var(--shadow);
+  max-width: min(560px, 92vw);
+}
+.instruction-text {
+  font-family: 'Baloo 2', cursive;
+  font-size: clamp(14px, 2.6vw, 20px);
+  font-weight: 700;
+}
+.instruction .speak-btn { width: 46px; height: 46px; font-size: 21px; flex: none; }
