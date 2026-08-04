@@ -1,0 +1,10 @@
+node_modules
+dist
+.git
+.gitignore
+.claude
+.DS_Store
+tests
+reference
+README.md
+PROYECTO_LIBRO_APRENDIZAJE.md
