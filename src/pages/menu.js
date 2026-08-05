@@ -27,8 +27,13 @@ function Chapter(chapter) {
   const status = getStatus(chapter.id);
   const meta = STATUS_TEXT[status] || chapter.meta;
 
-  return el(`button.chapter.${status}`, {
+  // El estado va como atributo, no como clase: si se concatena en el
+  // className, un estado que coincida con una clase global de la app
+  // (p. ej. "progress", que es la de los puntos de progreso) le aplica
+  // estilos ajenos al capítulo y lo saca de la lista.
+  return el('button.chapter', {
     attrs: { type: 'button' },
+    dataset: { status },
     on: {
       click: () => {
         audio.unlock();

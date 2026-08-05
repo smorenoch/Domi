@@ -56,6 +56,34 @@ const locked = await page.locator('.chapter.locked').count();
 check(available === 7, `7 capítulos jugables (encontrados: ${available})`);
 check(locked === 7, `7 capítulos "pronto" (encontrados: ${locked})`);
 
+/* Regresión: una lección empezada y no terminada queda "en progreso", y ese
+   estado tiene que seguir siendo una fila normal del índice. Se comprueba
+   que el capítulo siga dentro de la caja de su lista y en el flujo normal
+   — no basta con que exista en el DOM. */
+console.log('\n— Índice con una lección a medias —');
+await page.locator('.chapter:not(.locked)').first().click();
+await page.waitForSelector('.screen.active .big-btn');
+await page.click('.screen.active .big-btn');
+await page.waitForTimeout(600);
+await page.click('.corner-btn.right');
+await page.waitForSelector('.tracks');
+await page.waitForTimeout(300);
+
+const midway = await page.evaluate(() => {
+  const c = document.querySelector('.chapter');
+  const list = c.closest('.chapters').getBoundingClientRect();
+  const box = c.getBoundingClientRect();
+  return {
+    status: c.dataset.status,
+    position: getComputedStyle(c).position,
+    dentroDeLaLista: box.top >= list.top - 1 && box.bottom <= list.bottom + 1
+  };
+});
+check(midway.status === 'progress', `queda marcada en progreso (${midway.status})`);
+check(midway.position === 'static', `sigue en el flujo de la lista (position: ${midway.position})`);
+check(midway.dentroDeLaLista, 'sigue visible dentro de su lista, no se sale del índice');
+check(await page.locator('.chapter').first().isVisible(), 'el capítulo jugado sigue visible');
+
 async function solveUnit() {
   const cls = await page.locator('.screen.active').getAttribute('class');
 
@@ -105,7 +133,7 @@ async function playLesson(index) {
   await page.click('.screen.active .big-btn');
   await page.waitForTimeout(400);
 
-  const totalUnits = await page.locator('.progress .dot').count();
+  const totalUnits = await page.locator('.progress-dots .dot').count();
   check(totalUnits > 0, `${totalUnits} unidades con punto de progreso`);
 
   for (let unit = 0; unit < totalUnits; unit++) {
@@ -130,7 +158,7 @@ for (let i = 0; i < available; i++) await playLesson(i);
 console.log('\n— Persistencia —');
 await page.reload({ waitUntil: 'load' });
 await page.waitForSelector('.tracks');
-const doneAfterReload = await page.locator('.chapter.done').count();
+const doneAfterReload = await page.locator('.chapter[data-status="done"]').count();
 check(doneAfterReload === 7, `7 lecciones siguen completadas tras recargar (${doneAfterReload})`);
 
 await page.click('.corner-btn.right');

@@ -4,7 +4,9 @@
    --------------------------------------------------------------- */
 
 /* ---------- puntos de progreso ---------- */
-.progress {
+/* Nombre explícito: "progress" a secas es demasiado genérico y ya chocó
+   una vez con el estado de un capítulo del índice. */
+.progress-dots {
   position: absolute;
   top: 2vh;
   left: 50%;
@@ -249,4 +251,4 @@
   cursor: default;
 }
 .chapter.locked:active { transform: none; }
-.chapter.done .chapter-icon { background: #DFF3D8; }
+.chapter[data-status="done"] .chapter-icon { background: #DFF3D8; }

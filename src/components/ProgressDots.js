@@ -5,7 +5,7 @@
 import { el, clear, range } from '../lib/dom.js';
 
 export function ProgressDots(total) {
-  const node = el('div.progress.hide');
+  const node = el('div.progress-dots.hide');
 
   node.setTotal = (n) => {
     clear(node);
