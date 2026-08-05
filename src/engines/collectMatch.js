@@ -15,16 +15,26 @@
    }
    --------------------------------------------------------------- */
 
-import { el, clear, shuffle, pick, range, restartAnimation } from '../lib/dom.js';
+import { el, clear, shuffle, range, restartAnimation } from '../lib/dom.js';
 
-/* Formas neutras para el track de colores: la forma varía para que la niña
-   abstraiga el color, no la silueta. */
-const SHAPES = [
-  '<svg viewBox="0 0 100 100"><circle cx="50" cy="50" r="42" fill="currentColor"/></svg>',
-  '<svg viewBox="0 0 100 100"><path d="M50 6 L61 38 L96 38 L68 59 L79 93 L50 72 L21 93 L32 59 L4 38 L39 38 Z" fill="currentColor"/></svg>',
-  '<svg viewBox="0 0 100 100"><path d="M50 90 C18 66 4 44 4 27 C4 11 16 1 30 1 C41 1 48 8 50 16 C52 8 59 1 70 1 C84 1 96 11 96 27 C96 44 82 66 50 90 Z" fill="currentColor"/></svg>',
-  '<svg viewBox="0 0 100 100"><g fill="currentColor"><circle cx="50" cy="22" r="17"/><circle cx="76" cy="38" r="17"/><circle cx="66" cy="66" r="17"/><circle cx="34" cy="66" r="17"/><circle cx="24" cy="38" r="17"/><circle cx="50" cy="50" r="15"/></g></svg>'
-];
+/* Mancha de pintura: la MISMA figura en todos los tiles del track de colores.
+
+   Antes cada tile tomaba una forma distinta (círculo, estrella, corazón,
+   flor). Se probó con la usuaria real y no funciona: a los 3 años ya sabe
+   nombrar "corazón" y "estrella", así que la figura le gana la atención al
+   color, que es lo único que la lección enseña. Con una sola forma, el
+   color queda como el único atributo que varía entre tiles.
+
+   Se eligió una mancha —y no un círculo— justamente porque no es nada:
+   no tiene nombre que compita, y "mancha de pintura" es el objeto natural
+   cuando lo que se está mirando es color puro. */
+const PAINT_SPLAT = `<svg viewBox="0 0 100 100">
+  <path d="M50.0 3.0C55.4 2.7 62.6 6.3 66.5 10.3C70.3 14.2 71.8 21.8 73.3 26.7C74.9 31.5 74.3 35.4 75.9 39.3C77.5 43.2 80.8 45.5 83.0 50.0C85.2 54.5 88.8 60.5 88.8 66.1C88.8 71.6 86.9 79.1 83.2 83.2C79.6 87.3 72.4 90.4 66.8 90.7C61.3 90.9 54.7 87.3 50.0 85.0C45.3 82.7 42.1 79.4 38.9 76.8C35.7 74.1 34.1 71.5 30.9 69.1C27.7 66.7 23.5 65.8 19.5 62.6C15.5 59.4 9.3 55.2 7.0 50.0C4.7 44.8 3.9 37.1 5.7 31.6C7.4 26.2 12.7 20.7 17.5 17.5C22.2 14.2 28.9 14.5 34.3 12.1C39.7 9.7 44.6 3.3 50.0 3.0Z" fill="currentColor"/>
+  <circle cx="93" cy="36" r="3.4" fill="currentColor"/>
+  <circle cx="7" cy="58" r="2.8" fill="currentColor"/>
+  <circle cx="62" cy="96" r="2.4" fill="currentColor"/>
+  <circle cx="26" cy="6" r="1.9" fill="currentColor"/>
+</svg>`;
 
 export function collectMatch(lesson, api) {
   const { items, needed = 4, totalTiles = 9, visual = 'emoji' } = lesson.data;
@@ -34,15 +44,17 @@ export function collectMatch(lesson, api) {
 
   function itemVisual(item) {
     return visual === 'shape'
-      ? pick(SHAPES)
+      ? PAINT_SPLAT
       : `<span class="tile-emoji">${item.emoji}</span>`;
   }
 
   function buildTargetCard(item) {
-    const swatch = visual === 'shape';
-    const visualNode = el(`div.target-visual${swatch ? '.swatch' : ''}`, {
-      html: swatch ? '' : item.emoji,
-      style: swatch ? { color: item.hex } : {}
+    // La tarjeta objetivo muestra exactamente lo mismo que hay que buscar
+    // en la grilla: la misma mancha, en el color pedido.
+    const isSplat = visual === 'shape';
+    const visualNode = el('div.target-visual', {
+      html: isSplat ? PAINT_SPLAT : item.emoji,
+      style: isSplat ? { color: item.hex } : {}
     });
 
     return el('div.target-card', {}, [

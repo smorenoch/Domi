@@ -42,10 +42,6 @@ export function shuffle(list) {
   return arr;
 }
 
-export function pick(list) {
-  return list[Math.floor(Math.random() * list.length)];
-}
-
 export function range(n) {
   return Array.from({ length: n }, (_, i) => i);
 }
